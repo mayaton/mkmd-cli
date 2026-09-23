@@ -64,7 +64,11 @@ resolve_project_context() {
     project_name="$(basename "$repo_root")"
   fi
 
-  branch_name="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+  # symbolic-ref returns the branch name even in an empty repository with no commits.
+  # It fails on a detached HEAD, so fall back to the short commit ID.
+  branch_name="$(git symbolic-ref --short -q HEAD 2>/dev/null \
+    || git rev-parse --short HEAD 2>/dev/null \
+    || echo unknown)"
   branch_name="${branch_name//\//-}"
 }
 
